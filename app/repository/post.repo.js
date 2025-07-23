@@ -1,16 +1,15 @@
 const sql = require("../libs/db");
 const Post = function (post) {
-  this.postId = post.postId;                
+  this.postId = post.postId;
   this.title = post.title;
   this.content = post.content;
-  this.userId = post.userId;               
+  this.userId = post.userId;
   this.created_at = post.created_at;
   this.updated_at = post.updated_at;
-  this.views_count = post.views_count ;
-  this.likes_count = post.likes_count ;
+  this.views_count = post.views_count;
+  this.likes_count = post.likes_count;
   this.thumbnail_url = post.thumbnail_url;
 };
-
 
 exports.createPost = (post, result) => {
   const query = `
@@ -18,19 +17,26 @@ exports.createPost = (post, result) => {
     VALUES (?, ?, ?, ?, NOW(), NOW(), 0, 0)
   `;
 
-  sql.query(query, [post.title, post.content, post.userId, post.thumbnail_url], (err, res) => {
-    if (err) return result(err, null);
+  sql.query(
+    query,
+    [post.title, post.content, post.userId, post.thumbnail_url],
+    (err, res) => {
+      if (err) return result(err, null);
 
-    const insertedId = res.insertId;
+      const insertedId = res.insertId;
 
-    // Now fetch the inserted post
-    sql.query("SELECT * FROM posts WHERE postId = ?", [insertedId], (err2, res2) => {
-      if (err2) return result(err2, null);
-      result(null, res2[0]); // Send full post data
-    });
-  });
+      // Now fetch the inserted post
+      sql.query(
+        "SELECT * FROM posts WHERE postId = ?",
+        [insertedId],
+        (err2, res2) => {
+          if (err2) return result(err2, null);
+          result(null, res2[0]); // Send full post data
+        }
+      );
+    }
+  );
 };
-
 
 exports.getAllPosts = (result) => {
   const query = `
@@ -57,7 +63,6 @@ exports.getAllPosts = (result) => {
     result(null, res);
   });
 };
-
 
 exports.getPostById = (postId, result) => {
   const query = `
@@ -88,12 +93,15 @@ exports.getPostById = (postId, result) => {
   });
 };
 
-
 exports.incrementViewCount = (postId, result) => {
-  sql.query("UPDATE posts SET views_count = views_count + 1 WHERE postId = ?", [postId], (err, res) => {
-    if (err) return result(err, null);
-    return result(null, res);
-  });
+  sql.query(
+    "UPDATE posts SET views_count = views_count + 1 WHERE postId = ?",
+    [postId],
+    (err, res) => {
+      if (err) return result(err, null);
+      return result(null, res);
+    }
+  );
 };
 
 exports.updatePost = (postId, post, result) => {
@@ -120,7 +128,6 @@ exports.updatePost = (postId, post, result) => {
     }
   );
 };
-
 
 exports.deletePost = (postId, result) => {
   sql.query("DELETE FROM posts WHERE postId = ?", [postId], (err, res) => {

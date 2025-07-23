@@ -11,11 +11,11 @@ var connection = mysql.createPool({
 
 connection.getConnection((err, conn) => {
   if (err) {
-    ("Database connection failed:", err);
+    "Database connection failed:", err;
     return;
   }
   console.log("Database connected successfully!");
-  conn.release(); 
+  conn.release();
 });
 
 module.exports = connection;

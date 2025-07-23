@@ -1,56 +1,52 @@
-const Users = require('../repository/userLogin.repo');
-const crypto = require('crypto');
+const Users = require("../repository/userLogin.repo");
+const crypto = require("crypto");
 
 const {
   INTERNALSERVERERROR,
   HTTP200OK,
   BADREQUEST,
   Unauthorized,
-  NOTFOUND
-} = require('../libs/httpcode');
-
+  NOTFOUND,
+} = require("../libs/httpcode");
 
 function md5(string) {
-  return crypto.createHash('md5').update(string).digest('hex');
+  return crypto.createHash("md5").update(string).digest("hex");
 }
 
 exports.createUser = (req, res) => {
   if (!req.body) {
     return res.status(BADREQUEST).send({
-      message: "Incomplete request."
+      message: "Incomplete request.",
     });
   }
 
   const { email, password, username } = req.body;
   if (!email) {
     return res.status(BADREQUEST).send({
-      message: "Email is required."
+      message: "Email is required.",
     });
   }
   if (!password) {
     return res.status(BADREQUEST).send({
-      message: "Password is required."
+      message: "Password is required.",
     });
   }
   if (!username) {
     return res.status(BADREQUEST).send({
-      message: "Username is required."
+      message: "Username is required.",
     });
   }
-
 
   const user = {
     email: email,
     password: md5(password),
-    username: username
+    username: username,
   };
-
-  
 
   Users.createUser(user, (err, data) => {
     if (err) {
       res.status(INTERNALSERVERERROR).send({
-        message: err.message || "Some error occurred while creating the user."
+        message: err.message || "Some error occurred while creating the user.",
       });
     } else {
       res.status(HTTP200OK).send(data);
@@ -78,7 +74,11 @@ exports.loginByEmailID = (req, res) => {
 
   Users.loginByEmailID(user, (err, data) => {
     if (err) {
-      if (["Incorrect email", "Incorrect password", "Email not found"].includes(err)) {
+      if (
+        ["Incorrect email", "Incorrect password", "Email not found"].includes(
+          err
+        )
+      ) {
         return res.status(Unauthorized).send({
           isSuccessful: false,
           message: "Incorrect email or password.",
@@ -94,5 +94,3 @@ exports.loginByEmailID = (req, res) => {
     }
   });
 };
-
-

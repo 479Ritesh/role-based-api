@@ -4,13 +4,11 @@ const crypto = require("crypto");
 const CryptoJS = require("crypto-js");
 const { TOKEN_KEY, TIME_OUT } = require("../libs/constants.js");
 
-
 const Users = function (user) {
-    this.username = user.username;
-    this.emailId = user.emailId;
-    this.userId = user.userId;
-    this.isVerified = user.isVerified;
-  
+  this.username = user.username;
+  this.emailId = user.emailId;
+  this.userId = user.userId;
+  this.isVerified = user.isVerified;
 };
 
 Users.getAllUser = (result) => {
@@ -25,11 +23,11 @@ Users.getAllUser = (result) => {
       return result({ kind: "not_found" }, null);
     }
 
-    const users = res.map(user => ({
+    const users = res.map((user) => ({
       userId: user.userId,
       username: user.username,
       email: user.email,
-      isVerified: user.isVerified
+      isVerified: user.isVerified,
     }));
 
     result(null, users);
@@ -47,17 +45,23 @@ Users.deleteUser = (userId, result) => {
         return result(err, null);
       }
 
-      sql.query("DELETE FROM  comments WHERE userId = ?", [userId], (err, res) => {
-        if (err) {
-          return result(err, null);
-        }
+      sql.query(
+        "DELETE FROM  comments WHERE userId = ?",
+        [userId],
+        (err, res) => {
+          if (err) {
+            return result(err, null);
+          }
 
-        result(null, {"isSuccessful": true, message: "Successfully deleted user and related posts/comments." });
-      });
+          result(null, {
+            isSuccessful: true,
+            message: "Successfully deleted user and related posts/comments.",
+          });
+        }
+      );
     });
   });
 };
-
 
 Users.VerifiedByAdmin = (userId, result) => {
   const query = "UPDATE users SET isVerified = 1 WHERE userId = ?";
@@ -71,9 +75,11 @@ Users.VerifiedByAdmin = (userId, result) => {
       return result({ kind: "not_found" }, null);
     }
 
-    result(null, { isSuccessful: true, message: "User verified successfully." });
+    result(null, {
+      isSuccessful: true,
+      message: "User verified successfully.",
+    });
   });
 };
-
 
 module.exports = Users;

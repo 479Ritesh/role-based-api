@@ -2,7 +2,7 @@ const Users = require("../repository/adminDashboard.repo");
 const {
   INTERNALSERVERERROR,
   HTTP200OK,
-  BADREQUEST
+  BADREQUEST,
 } = require("../libs/httpcode");
 
 exports.getAllUser = (req, res) => {
@@ -27,22 +27,19 @@ exports.deleteUser = (req, res) => {
   const user_id = req.params.user_id;
   if (!user_id) {
     res.status(BADREQUEST).send({
-      message: "User ID can not be empty!"
+      message: "User ID can not be empty!",
     });
     return;
   }
-  Users.deleteUser(
-    user_id,
-    (err, data) => {
-      if (err) {
-        res.status(INTERNALSERVERERROR).send({
-          message: err.message || "Some error occurred while deleting user."
-        });
-      } else {
-        res.status(HTTP200OK).send(data);
-      }
+  Users.deleteUser(user_id, (err, data) => {
+    if (err) {
+      res.status(INTERNALSERVERERROR).send({
+        message: err.message || "Some error occurred while deleting user.",
+      });
+    } else {
+      res.status(HTTP200OK).send(data);
     }
-  );
+  });
 };
 
 exports.VerifiedByAdmin = (req, res) => {
@@ -50,7 +47,7 @@ exports.VerifiedByAdmin = (req, res) => {
 
   if (!userId) {
     return res.status(BADREQUEST).send({
-      message: "User ID is required."
+      message: "User ID is required.",
     });
   }
 
@@ -58,11 +55,11 @@ exports.VerifiedByAdmin = (req, res) => {
     if (err) {
       if (err.kind === "not_found") {
         return res.status(NOTFOUND).send({
-          message: `User not found with ID ${userId}.`
+          message: `User not found with ID ${userId}.`,
         });
       }
       return res.status(INTERNALSERVERERROR).send({
-        message: `Error verifying user with ID ${userId}`
+        message: `Error verifying user with ID ${userId}`,
       });
     }
 
