@@ -2,58 +2,83 @@ const Users = require("../repository/comment.repo");
 const { HTTP200OK, BADREQUEST, INTERNALSERVERERROR } = require("../libs/httpcode");
 
 exports.createComment = (req, res) => {
-  const { content, postId, parentCommentId } = req.body;
-  const userId = req.user.id;
+  const { content, postId, parentCommentId, userId } = req.body;
 
-  if (!content || !postId) {
-    return res.status(BADREQUEST).send({ message: "Content and postId are required." });
+  if (!content || !postId || !userId) {
+    return res.status(400).send({ message: "Content, userId and postId are required." });
   }
 
   const comment = { content, userId, postId, parentCommentId };
 
-  Users.createComment(comment, (err, data) => {
-    if (err) return res.status(INTERNALSERVERERROR).send({ message: "Error creating comment" });
-    return res.status(HTTP200OK).send(data);
+  Users.createComment(comment, (err, fullComment) => {
+    if (err || !fullComment) {
+      console.error("Error or no comment returned:", err);
+      return res.status(500).send({isSuccessful:false, message: "Error creating comment or fetching data" });
+    }
+
+    return res.status(200).send({
+      message: "Comment created successfully",
+      isSuccessful: true,
+      comment: {
+        commentId: fullComment.commentId,
+        content: fullComment.content,
+        userId: fullComment.userId,
+        postId: fullComment.postId,
+        parentCommentId: fullComment.parentCommentId,
+        created_at: fullComment.created_at,
+        user: {
+          userId: fullComment.userId,
+          username: fullComment.username
+        },
+        post: {
+          postId: fullComment.postId,
+          title: fullComment.title
+        }
+      }
+    });
   });
 };
 
+
 exports.getCommentsByPost = (req, res) => {
-  const postId = req.params.postId;
+  const postId = req.query.postId;
+  if (!postId) {
+    return res.status(BADREQUEST).send({ message: "Post ID is required" });
+  }
 
   Users.getCommentsByPost(postId, (err, data) => {
-    if (err) return res.status(INTERNALSERVERERROR).send({ message: "Error fetching comments" });
+    if (err) return res.status(INTERNALSERVERERROR).send({isSuccessful:false, message: "Error fetching comments" });
     return res.status(HTTP200OK).send(data);
   });
 };
 
 exports.updateComment = (req, res) => {
-  const commentId = req.params.id;
-  const userId = req.user.id;
+  const { commentId, content } = req.body;
 
-  Users.getCommentById(commentId, (err, comment) => {
-    if (err || !comment || comment.userId !== userId) {
-      return res.status(403).send({ message: "Not authorized to update this comment" });
+  if (!commentId || !content) {
+    return res.status(400).send({ isSuccessful: false, message: "Missing commentId or content" });
+  }
+
+  Users.updateComment(commentId, content, (err, data) => {
+    if (err) {
+      if (err.kind === "not_found") {
+        return res.status(404).send({ isSuccessful: false, message: "Comment not found" });
+      }
+      return res.status(500).send({ isSuccessful: false, message: "Error updating comment" });
     }
 
-    Users.updateComment(commentId, req.body.content, (err, data) => {
-      if (err) return res.status(INTERNALSERVERERROR).send({ message: "Error updating comment" });
-      return res.status(HTTP200OK).send({ message: "Comment updated" });
-    });
+    return res.status(200).send({ isSuccessful: true, message: "Comment updated successfully" });
   });
 };
 
 exports.deleteComment = (req, res) => {
-  const commentId = req.params.id;
-  const userId = req.user.id;
-
-  Users.getCommentById(commentId, (err, comment) => {
-    if (err || !comment || comment.userId !== userId) {
-      return res.status(403).send({ message: "Not authorized to delete this comment" });
-    }
+  const commentId = req.query.commentId;
+if (!commentId) {
+    return res.status(BADREQUEST).send({ message: "Comment ID is required" });
+  }
 
     Users.deleteComment(commentId, (err, data) => {
-      if (err) return res.status(INTERNALSERVERERROR).send({ message: "Error deleting comment" });
-      return res.status(HTTP200OK).send({ message: "Comment deleted" });
+      if (err) return res.status(INTERNALSERVERERROR).send({isSuccessful:false, message: "Error deleting comment" });
+      return res.status(HTTP200OK).send({ isSuccessful:true,message: "Comment deleted" });
     });
-  });
 };
