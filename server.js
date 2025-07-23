@@ -15,7 +15,8 @@ app.get('/', (req, res) => {
 require("./app/routes/admin.routes")(app);
 require("./app/routes/adminDashboard.routes")(app);
 require("./app/routes/userLogin.routes")(app);
-
+require("./app/routes/post.routes")(app);
+require("./app/routes/comment.routes")(app);
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {

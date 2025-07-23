@@ -15,7 +15,7 @@ exports.createAdminUser = (req, res) => {
   
     const {email, password, username} = req.body;
     if (!email) {
-      return res.status(BADREQUEST).send({ message: "emailId is required." });
+      return res.status(BADREQUEST).send({ message: "email is required." });
     }
     if (!password) {
       return res.status(BADREQUEST).send({ message: "Password is required." });
@@ -45,9 +45,9 @@ exports.loginByEmailID = (req, res) => {
       message: "Content can not be empty!"
     });
   }
-  if (!req.body.emailId ) {
+  if (!req.body.email ) {
     return res.status(BADREQUEST).send({ 
-      message: "emailId can not be empty!"
+      message: "email can not be empty!"
     });
   }
   if ( !req.body.password) {
@@ -57,7 +57,7 @@ exports.loginByEmailID = (req, res) => {
   }
 
   const user = {
-    emailId: req.body.emailId,
+    email: req.body.email,
     password: req.body.password
   };
 

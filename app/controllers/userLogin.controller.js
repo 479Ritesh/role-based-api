@@ -55,7 +55,7 @@ exports.createUser = (req, res) => {
     } else {
       res.status(HTTP200OK).send(data);
     }
-  }, device_id);
+  });
 };
 
 exports.loginByEmailID = (req, res) => {

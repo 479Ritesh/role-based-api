@@ -46,27 +46,26 @@ exports.deleteUser = (req, res) => {
 };
 
 exports.VerifiedByAdmin = (req, res) => {
-  if (!req.body) {
+  const userId = req.query.userId;
+
+  if (!userId) {
     return res.status(BADREQUEST).send({
-      message: "Content can not be empty!"
+      message: "User ID is required."
     });
   }
-  Users.VerifiedByAdmin(
-    req.body.user_id,
-    (err, data) => {
-      if (err) {
-        if (err.kind === "not_found") {
-          return res.status(NOTFOUND).send({
-            message: `Not found user with id ${req.body.user_id}.`
-          });
-        } else {
-          return res.status(INTERNALSERVERERROR).send({
-            message: "Error updating user with id " + req.body.user_id
-          });
-        }
-      } else {
-        return res.send(data);
+
+  Users.VerifiedByAdmin(userId, (err, data) => {
+    if (err) {
+      if (err.kind === "not_found") {
+        return res.status(NOTFOUND).send({
+          message: `User not found with ID ${userId}.`
+        });
       }
+      return res.status(INTERNALSERVERERROR).send({
+        message: `Error verifying user with ID ${userId}`
+      });
     }
-  );
+
+    return res.status(HTTP200OK).send(data);
+  });
 };

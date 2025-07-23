@@ -7,14 +7,16 @@ const { TOKEN_KEY, TIME_OUT } = require("../libs/constants.js");
 
 const Users = function (user) {
     this.username = user.username;
-    this.emailId = user.emailId;
+    this.email = user.email;
     this.admin_id = user.admin_id;
+    this.created_at = user.created_at;
+    this.updated_at = user.updated_at;
   
 };
 
 Users.createAdminUser = (user, result) => {
   
-    sql.query("SELECT * FROM admin_table WHERE emailId = ?", [user.emailId], (err, existingUsers) => {
+    sql.query("SELECT * FROM admin_table WHERE email = ?", [user.email], (err, existingUsers) => {
         if (err) {
             return result(err, null);
         }
@@ -31,10 +33,10 @@ Users.createAdminUser = (user, result) => {
 
         
         sql.query(
-          "INSERT INTO admin_table (password, emailId, username,created_at,updated_at) VALUES ( ?, ?, ?, ?, ?,NOW(),NOW())",
+          "INSERT INTO admin_table (password, email, username,created_at,updated_at) VALUES ( ?, ?, ?,NOW(),NOW())",
 
 
-            [ hashedPassword, user.emailId, user.username],
+            [ hashedPassword, user.email, user.username],
             (error, response) => {
                 if (error) {
                     return result(error, null);
@@ -43,14 +45,14 @@ Users.createAdminUser = (user, result) => {
                 const resObj = {
                     msg: 'Successfully created',
                     isSuccessful: true,
-                    emailId: user.emailId,
+                    email: user.email,
                     user_type: user.user_type,
                     username: user.username,
                     admin_id: admin_id,
                 };
                 const tokenPayload = {
                     admin_id: admin_id,
-                    emailId: user.emailId,
+                    email: user.email,
                 };
                 const token = jwt.sign(
                     tokenPayload,
@@ -65,7 +67,7 @@ Users.createAdminUser = (user, result) => {
 };
 
 Users.loginByEmailID = (user, result) => {
-    sql.query("SELECT admin_id,username, password FROM admin_table WHERE emailId = ?", [user.emailId], (err, res) => {
+    sql.query("SELECT admin_id,username, password FROM admin_table WHERE email = ?", [user.email], (err, res) => {
       if (err) {
         return result(err, null);
       }

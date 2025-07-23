@@ -7,7 +7,7 @@ const INVALID_TOKEN = 'Invalid Token';
  const AUTH_REQUIRED= 'A token is required for authentication';
  const MSG_SUCCESS = 'success';
  const NO_DATA_FOUND = 'no data found';
- 
+ const TIME_OUT = '1h';
 
 module.exports = {
     PUBLIC_KEY1: PUBLIC_KEY1,
@@ -19,5 +19,6 @@ module.exports = {
     AUTH_REQUIRED: AUTH_REQUIRED,
     MSG_SUCCESS: MSG_SUCCESS,
     NO_DATA_FOUND: NO_DATA_FOUND,
+    TIME_OUT: TIME_OUT,
  
 };

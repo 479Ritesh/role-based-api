@@ -8,64 +8,72 @@ const { TOKEN_KEY, TIME_OUT } = require("../libs/constants.js");
 const Users = function (user) {
     this.username = user.username;
     this.emailId = user.emailId;
-    this.admin_id = user.admin_id;
+    this.userId = user.userId;
+    this.isVerified = user.isVerified;
   
 };
 
 Users.getAllUser = (result) => {
-  sql.query("SELECT * FROM users", (err, res) => {
+  const query = "SELECT userId, username, email, isVerified FROM users";
+
+  sql.query(query, (err, res) => {
     if (err) {
-      result(err, null);
-      return;
+      return result(err, null);
     }
 
-    if (res.length) {
-      const formattedResult = res.map(user => ({
-        user_id: user.user_id , 
-        username: user.username,
-        email: user.email,
-        isVerified: user.isVerified,
-      }));
-      result(null, formattedResult);
-    } else {
-      result({ kind: "not_found" }, null);
+    if (!res.length) {
+      return result({ kind: "not_found" }, null);
     }
+
+    const users = res.map(user => ({
+      userId: user.userId,
+      username: user.username,
+      email: user.email,
+      isVerified: user.isVerified
+    }));
+
+    result(null, users);
   });
 };
 
-Users.deleteUser = (user_id, result) => {
-  sql.query(
-      "DELETE FROM users WHERE user_id = ?",
-      [user_id],
-      (err, res) => {
-          if (err) {
-              result(err, null);
-              return;
-          }
+Users.deleteUser = (userId, result) => {
+  sql.query("DELETE FROM users WHERE userId = ?", [userId], (err, res) => {
+    if (err) {
+      return result(err, null);
+    }
 
-                  result(null, { message: "Successfully deleted User" });
-              });
-};
-
-Users.VerifiedByAdmin = (user_id, result) => {
-  sql.query(
-      "UPDATE `users` SET isVerified = 1 WHERE user_id = ?",
-      [user_id],
-      (err, res) => {
-          if (err) {
-              result(err, null);
-              return;
-          }
-
-          if (res.affectedRows == 0) {
-              result({ kind: "not_found" }, null);
-              return;
-          }
-
-          result(null, { isSuccessful: true, msg: 'updated successfully' });
-          return;
+    sql.query("DELETE FROM posts WHERE userId = ?", [userId], (err, res) => {
+      if (err) {
+        return result(err, null);
       }
-  );
+
+      sql.query("DELETE FROM  comments WHERE userId = ?", [userId], (err, res) => {
+        if (err) {
+          return result(err, null);
+        }
+
+        result(null, {"isSuccessful": true, message: "Successfully deleted user and related posts/comments." });
+      });
+    });
+  });
 };
+
+
+Users.VerifiedByAdmin = (userId, result) => {
+  const query = "UPDATE users SET isVerified = 1 WHERE userId = ?";
+
+  sql.query(query, [userId], (err, res) => {
+    if (err) {
+      return result(err, null);
+    }
+
+    if (res.affectedRows === 0) {
+      return result({ kind: "not_found" }, null);
+    }
+
+    result(null, { isSuccessful: true, message: "User verified successfully." });
+  });
+};
+
 
 module.exports = Users;
