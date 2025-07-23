@@ -1,6 +1,11 @@
 const sql = require("../libs/db.js");
 const jwt = require('jsonwebtoken');
-const Users = require("../libs/constructor.js");
+const Users = function (user) {
+  this.username = user.username;
+  this.emailId = user.emailId;
+  this.admin_id = user.admin_id;
+
+};
 const { TOKEN_KEY, TIME_OUT } = require("../libs/constants.js");
 
 Users.createUser = (user, result) => {
