@@ -108,26 +108,50 @@ exports.updatePost = (postId, post, result) => {
   if (typeof result !== "function") {
     throw new Error("Callback 'result' must be a function");
   }
+
+  const fields = [];
+  const values = [];
+
+  if (post.title !== undefined) {
+    fields.push("title = ?");
+    values.push(post.title);
+  }
+  if (post.content !== undefined) {
+    fields.push("content = ?");
+    values.push(post.content);
+  }
+  if (post.thumbnail_url !== undefined) {
+    fields.push("thumbnail_url = ?");
+    values.push(post.thumbnail_url);
+  }
+
+  if (fields.length === 0) {
+    // Nothing to update
+    return result(null, null);
+  }
+
+  // Add updated_at column update
+  fields.push("updated_at = NOW()");
+
   const query = `
-    UPDATE posts 
-    SET title = ?, content = ?, thumbnail_url = ?, updated_at = NOW() 
+    UPDATE posts
+    SET ${fields.join(", ")}
     WHERE postId = ?
   `;
 
-  sql.query(
-    query,
-    [post.title, post.content, post.thumbnail_url, postId],
-    (err, res) => {
-      if (err) return result(err, null);
+  values.push(postId);
 
-      if (res.affectedRows === 0) {
-        return result({ kind: "not_found" }, null);
-      }
+  sql.query(query, values, (err, res) => {
+    if (err) return result(err, null);
 
-      return result(null, res);
+    if (res.affectedRows === 0) {
+      return result({ kind: "not_found" }, null);
     }
-  );
+
+    return result(null, res);
+  });
 };
+
 
 exports.deletePost = (postId, result) => {
   sql.query("DELETE FROM posts WHERE postId = ?", [postId], (err, res) => {

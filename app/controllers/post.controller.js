@@ -6,7 +6,10 @@ const {
 } = require("../libs/httpcode");
 
 exports.createPost = (req, res) => {
-  const { title, content, thumbnail_url, userId } = req.body;
+  const { title, content, userId } = req.body;
+  const thumbnail_url = req.file
+    ? `${req.protocol}://${req.get("host")}/uploads/${req.file.filename}`
+    : null;
 
   if (!title || !content) {
     return res
@@ -54,16 +57,31 @@ exports.getPostById = (req, res) => {
 };
 
 exports.updatePost = (req, res) => {
-  const { title, content, thumbnail_url, postId } = req.body;
+  const { title, content, postId } = req.body;
 
-  if (!title || !content) {
+  if (!postId) {
     return res.status(BADREQUEST).send({
       isSuccessful: false,
-      message: "Title and content are required",
+      message: "postId is required",
     });
   }
 
-  const updatedPost = { title, content, thumbnail_url, postId };
+  const updatedPost = {};
+  if (title !== undefined) updatedPost.title = title;
+  if (content !== undefined) updatedPost.content = content;
+
+  if (req.file) {
+    updatedPost.thumbnail_url = `${req.protocol}://${req.get("host")}/uploads/${req.file.filename}`;
+  } else if (req.body.thumbnail_url !== undefined) {
+    updatedPost.thumbnail_url = req.body.thumbnail_url;
+  }
+
+  if (Object.keys(updatedPost).length === 0) {
+    return res.status(BADREQUEST).send({
+      isSuccessful: false,
+      message: "At least one field must be provided to update",
+    });
+  }
 
   Users.updatePost(postId, updatedPost, (err, data) => {
     if (err) {
@@ -73,7 +91,6 @@ exports.updatePost = (req, res) => {
           message: "Post not found",
         });
       }
-
       return res.status(INTERNALSERVERERROR).send({
         isSuccessful: false,
         message: "Error updating post",
@@ -86,6 +103,7 @@ exports.updatePost = (req, res) => {
     });
   });
 };
+
 
 exports.deletePost = (req, res) => {
   const postId = req.query.postId;
