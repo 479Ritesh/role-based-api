@@ -20,7 +20,7 @@ A secure backend built in Node.js + Express.js with MySQL, supporting role-based
 - Admin can manage all posts/comments
 - Threaded comment system
 - Post views and likes counter
-
+- Post thumbnail image upload using Multer
 ---
 
 ## 🛠️ Setup Instructions
